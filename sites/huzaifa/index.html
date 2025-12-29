@@ -26,7 +26,6 @@
     .channel-banner .actions{display:flex;gap:0.5rem}
     .channel-banner .actions .btn{padding:0.35rem 0.6rem}
 
-    /* small responsive tweak */
     @media(max-width:900px){.grid{grid-template-columns:1fr;}}
   </style>
 </head>
@@ -58,18 +57,13 @@
         <p>Write bio, channel description, research, collabs, videos, study notes here...</p>
         <p>Video example — open embedded player inside this site or open on YouTube:</p>
         <p>
-          <!-- Direct channel link (opens in new tab) -->
-          <a href="https://www.youtube.com/@huzaifa" target="_blank" class="btn small" id="open-channel">Open Channel</a>
-          <!-- Example video (plays inside modal) -->
+          <a href="https://www.youtube.com/@GamingBricks-67" target="_blank" class="btn small" id="open-channel">Open Channel</a>
           <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" data-embed="true" class="btn small" id="example-embed">Play example video inside site</a>
         </p>
-        <!-- Channel banner (injected by JS) -->
         <div id="channel-banner-container" style="margin-top:0.75rem"></div>
-        <!-- Place to try embedding a channel/playlist iframe on page load. -->
         <div id="channel-embed-container" style="margin-top:0.75rem"></div>
       </div>
 
-      <!-- Dynamic category items will be rendered here -->
       <div id="categories" class="category-list" aria-live="polite"></div>
 
     </div>
@@ -80,7 +74,6 @@
     </div>
   </div>
 
-  <!-- Reuse same modal markup as index; script will handle embed link with data-embed -->
   <div id="yt-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-content">
       <button id="modal-close" class="btn-close">✕</button>
@@ -90,13 +83,11 @@
 
   <script src="../../assets/js/site.js"></script>
   <script>
-    // attach embed handler to local example link
     document.addEventListener('DOMContentLoaded', ()=>{
       const a = document.getElementById('example-embed');
       if(a) a.addEventListener('click', e=>{
         e.preventDefault();
         const evt = { currentTarget: a };
-        // reuse function defined in /assets/js/site.js
         if(typeof openYouTubeEmbed === 'function') openYouTubeEmbed(evt);
       });
     });

@@ -1,4 +1,12 @@
 // Small client script to populate pages and handle YouTube in-site embeds
+// Site-specific configuration: fallback channel and profile image. Update as needed.
+const SITE_CONFIG = {
+  defaultChannelUrl: 'https://www.youtube.com/@GamingBricks-67',
+  profileAvatar: '/assets/img/profile.jpg',
+  channelHandle: '@GamingBricks-67'
+};
+// Optionally loaded from /assets/config.json (not committed); see assets/config.example.json
+let YT_API_KEY = null;
 let PROG_DATA = { sites: [], categories: [] };
 let _CURRENT_CHANNEL_ITEM = null;
 
@@ -23,12 +31,92 @@ async function loadData(){
     const initial = location.hash ? location.hash.replace('#','') : (PROG_DATA.categories && PROG_DATA.categories[0] && PROG_DATA.categories[0].id);
     if(initial) showCategory(initial);
     // attempt to load a channel embed (optional)
+    // load optional config (contains api key) and then try load channel
+    await loadOptionalConfig();
     tryLoadChannelEmbed();
   }catch(e){
     console.error('Failed to load categories.json', e);
     const catEl = document.getElementById('categories');
     if(catEl) catEl.innerText = 'Could not load categories.json.';
   }
+}
+
+async function loadOptionalConfig(){
+  try{
+    const res = await fetch('/assets/config.json', {cache:'no-store'});
+    if(!res.ok) return;
+    const cfg = await res.json();
+    if(cfg && cfg.ytApiKey) YT_API_KEY = cfg.ytApiKey;
+  }catch(e){ /* ignore - no config present */ }
+}
+
+// Given a channel url or handle, try to resolve channel info using YouTube Data API v3.
+async function fetchChannelDataFromHandleOrUrl(handleOrUrl){
+  if(!YT_API_KEY) return null;
+  try{
+    // extract a search query (handle like @name or channel/user id or url)
+    const q = parseHandleQuery(handleOrUrl);
+    if(!q) return null;
+    // First, search for channel
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(q)}&key=${encodeURIComponent(YT_API_KEY)}`;
+    const sr = await fetch(searchUrl);
+    if(!sr.ok) return null;
+    const sdata = await sr.json();
+    if(!sdata.items || sdata.items.length === 0) return null;
+    const ch = sdata.items[0];
+    const channelId = ch.snippet && ch.id && ch.id.channelId ? ch.id.channelId : (ch.id && ch.id.videoId ? null : null);
+    const title = ch.snippet.title;
+    const description = ch.snippet.description || '';
+    const avatarUrl = (ch.snippet.thumbnails && (ch.snippet.thumbnails.high||ch.snippet.thumbnails.default||ch.snippet.thumbnails.medium)) ? (ch.snippet.thumbnails.high || ch.snippet.thumbnails.medium || ch.snippet.thumbnails.default).url : null;
+
+    // fetch contentDetails to get uploads playlist
+    let uploadsPlaylist = null;
+    if(channelId){
+      const cUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${encodeURIComponent(channelId)}&key=${encodeURIComponent(YT_API_KEY)}`;
+      const cr = await fetch(cUrl);
+      if(cr.ok){
+        const cdata = await cr.json();
+        if(cdata.items && cdata.items[0] && cdata.items[0].contentDetails && cdata.items[0].contentDetails.relatedPlaylists){
+          uploadsPlaylist = cdata.items[0].contentDetails.relatedPlaylists.uploads;
+        }
+      }
+    }
+
+    return {
+      type: 'channel',
+      url: channelId ? ('https://www.youtube.com/channel/' + channelId) : (handleOrUrl || SITE_CONFIG.defaultChannelUrl),
+      avatarUrl: avatarUrl || SITE_CONFIG.profileAvatar,
+      title: title || SITE_CONFIG.channelHandle || 'Channel',
+      description: description || 'Channel',
+      uploadsPlaylistId: uploadsPlaylist || null
+    };
+  }catch(e){
+    console.error('fetchChannelDataFromHandleOrUrl error', e);
+    return null;
+  }
+}
+
+function parseHandleQuery(handleOrUrl){
+  if(!handleOrUrl) return null;
+  try{
+    // if it's a URL, try to parse path last segment or channel id
+    const u = new URL(handleOrUrl);
+    if(u.hostname.includes('youtube.com')){
+      // /@handle or /channel/ID
+      const p = u.pathname.replace(/^\//,'');
+      if(p.startsWith('@')) return p; // @handle
+      if(p.startsWith('channel/')) return p.split('/')[1];
+      // fallback to search on the full title
+      return u.pathname + ' ' + (u.search || '');
+    }
+    if(u.hostname === 'youtu.be') return u.pathname.slice(1);
+  }catch(e){
+    // not a url; if it starts with @, use directly
+    if(handleOrUrl.startsWith('@')) return handleOrUrl;
+    // otherwise return as search query
+    return handleOrUrl;
+  }
+  return handleOrUrl;
 }
 
 function renderSites(sites){
@@ -237,10 +325,10 @@ function closeModal(){
   }
 }
 
-function tryLoadChannelEmbed(){
+async function tryLoadChannelEmbed(){
   const container = document.getElementById('channel-embed-container');
   const bannerContainer = document.getElementById('channel-banner-container');
-  if(!container || !PROG_DATA.categories) return;
+  if(!PROG_DATA || !PROG_DATA.categories) return;
   const currentSite = getCurrentSiteName();
   // find first channel item for this site across categories
   let channelItem = null;
@@ -254,9 +342,31 @@ function tryLoadChannelEmbed(){
     if(channelItem) break;
   }
   container.innerHTML = '';
+  // If categories.json doesn't include a channel for this site, use SITE_CONFIG fallback
   if(!channelItem){
-    if(bannerContainer) bannerContainer.innerHTML = '';
-    return;
+    // if API key present, try to resolve richer channel data from YouTube Data API
+    if(YT_API_KEY){
+      // try resolving by handle/url from SITE_CONFIG
+      // note: this is best-effort and depends on API quotas and CORS
+      // we await here to ensure banner can render with fetched avatar
+      // (fetchChannelDataFromHandleOrUrl was added above)
+      // eslint-disable-next-line no-await-in-loop
+      const fetched = await fetchChannelDataFromHandleOrUrl(SITE_CONFIG.defaultChannelUrl || SITE_CONFIG.channelHandle);
+      if(fetched) channelItem = fetched;
+    }
+    if(!channelItem && SITE_CONFIG && SITE_CONFIG.defaultChannelUrl){
+      channelItem = {
+        type: 'channel',
+        url: SITE_CONFIG.defaultChannelUrl,
+        avatarUrl: SITE_CONFIG.profileAvatar,
+        title: SITE_CONFIG.channelHandle || 'Channel',
+        description: 'Official channel'
+      };
+    }
+    if(!channelItem){
+      if(bannerContainer) bannerContainer.innerHTML = '';
+      return;
+    }
   }
   _CURRENT_CHANNEL_ITEM = channelItem;
 
@@ -285,6 +395,9 @@ function renderChannelBanner(item){
     img.style.borderRadius='6px';
     avatar.innerHTML='';
     avatar.appendChild(img);
+    // update header/profile image if present
+    const headerImg = document.querySelector('.profile-pic img');
+    if(headerImg) headerImg.src = item.avatarUrl;
     // add play overlay icon
     const overlay = document.createElement('span');
     overlay.className = 'play-overlay';

@@ -1,26 +1,57 @@
-# Static multi-site skeleton
+# Huzaifa — Personal Hub
 
-This folder contains a small static site skeleton that supports multiple sites under `sites/` and a GitHub Actions workflow to publish any chosen site folder to GitHub Pages.
+This repository hosts a small static personal hub for "Huzaifa" (Gaming Bricks). It's a lightweight static HTML/CSS/JS site that is driven from `categories.json` and can optionally use the YouTube Data API to fetch live channel thumbnails and metadata.
 
-How it works
-- Put a site in `sites/<site-name>/index.html`.
-- Edit `categories.json` to add categories, items and to list sites.
-- The site index (`index.html`) will generate a simple list and category boxes from `categories.json`.
-- YouTube links in `categories.json` with `embed: true` open an in-site player modal; otherwise they open the external YouTube page.
+Quick preview
+1. Run a static server from the repo root:
 
-Publishing (GitHub Pages)
-1. Push to the `main` branch. The workflow `.github/workflows/deploy.yml` will automatically publish the default site `sites/harisatif` to the `gh-pages` branch.
-2. To publish a different folder, go to Actions → Deploy selected site, use the **Run workflow** and set `site_path` (for example `sites/another-site`).
-3. In GitHub repository Settings → Pages set the source to the `gh-pages` branch (if not done automatically).
+```bash
+cd /Volumes/Development/Huzaifa-projects/Huzaifa
+python3 -m http.server 8000
+# then open http://localhost:8000
+```
 
-Notes for hosting multiple sites
-- This repository is configured to publish a single site (the chosen folder) to GitHub Pages. If you want fully separate URLs for several sites, create one repository per public site or use subpaths/branches and configure a reverse proxy on your domain.
-- The workflow can publish any folder inside the repository; that lets you keep multiple site folders but publish one at a time.
+Key files
+- `index.html` — site root (Huzaifa personal hub)
+- `sites/huzaifa/index.html` — per-site page for Huzaifa
+- `assets/js/site.js` — client script: reads `categories.json`, renders category items and channel banner; includes optional YouTube Data API integration
+- `categories.json` — list of sites and content categories
+- `assets/config.example.json` — example runtime config (create `assets/config.json` with your API key if you want automatic channel metadata)
 
-Adding categories and items
-- Edit `categories.json`. Each item can set `embed: true` to allow opening the video inside the site.
+YouTube Data API (optional)
 
-If you'd like, I can:
-- Add more example sites under `sites/`.
-- Add small unit tests or an npm build step.
-- Wire up a small admin JSON editor page to add categories directly from the browser.
+The site can fetch channel thumbnail/title/playlist information from the YouTube Data API so the header/profile image and the channel banner show real thumbnails.
+
+To enable this:
+1. Create an API key in Google Cloud Console and enable **YouTube Data API v3**.
+2. Copy the example config and add your key locally (do NOT commit the real key):
+
+```bash
+cp assets/config.example.json assets/config.json
+# then edit assets/config.json and set ytApiKey
+```
+
+assets/config.json contents:
+```json
+{
+	"ytApiKey": "YOUR_KEY_HERE"
+}
+```
+
+When present, the site client will try to resolve the configured default channel (currently `SITE_CONFIG.defaultChannelUrl`) and update the header avatar and channel banner using the fetched thumbnail.
+
+Security note
+- The API key (if placed into `assets/config.json`) will be fetched by the browser at runtime. If you prefer not to expose the key publicly, create a small server-side proxy or function that stores the key and fetches channel data on the server instead.
+
+Rename note
+- `HarisAtif.html` has been left as a small redirect page pointing to `huzaifaatif.html` (the renamed copy). If you'd rather fully delete the old file, tell me and I will remove it.
+
+Deploy
+- The repository can be published to GitHub Pages. If you already have a workflow (see `.github/workflows/deploy.yml`) it may publish a chosen `sites/<site-name>` folder; update that `site_path` to `sites/huzaifa` if you want the Huzaifa folder published.
+
+Next steps I can take for you
+- Replace the header image by downloading and saving the thumbnail into `assets/img/profile.jpg` (requires a server-side script or manual save).
+- Add a GitHub Actions step to automatically publish `sites/huzaifa` to GitHub Pages.
+- Implement a small server-side proxy to keep the YouTube API key secret.
+
+If you'd like me to do any of the above now, tell me which and I'll proceed.

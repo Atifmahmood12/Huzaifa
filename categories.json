@@ -1,10 +1,10 @@
 {
   "sites": [
     {
-      "name": "harisatif",
-      "path": "sites/harisatif",
-      "title": "ProGamer Hub (HarisAtif)",
-      "description": "Personal/pro-gaming page with videos and notes"
+      "name": "huzaifa",
+      "path": "sites/huzaifa",
+      "title": "Huzaifa — Gaming Bricks",
+      "description": "Personal hub for Gaming Bricks (videos, projects, research)"
     }
   ],
   "categories": [
@@ -16,20 +16,20 @@
           "title": "Sample YouTube video (embed)",
           "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
           "embed": true,
-          "site": "harisatif"
+          "site": "huzaifa"
         },
         {
-          "title": "ProGamer channel",
-          "url": "https://www.youtube.com/@progamer-sub",
+          "title": "Gaming Bricks channel",
+          "url": "https://www.youtube.com/@GamingBricks-67",
           "embed": false,
-          "site": "harisatif",
+          "site": "huzaifa",
           "type": "channel",
           "playlist": "UUjMnCZ55vIzAHoqdprotPbw",
           "embedUrl": "https://www.youtube.com/embed?listType=playlist&list=UUjMnCZ55vIzAHoqdprotPbw",
-          "avatarUrl": "https://via.placeholder.com/96?text=PG",
+          "avatarUrl": "/assets/img/profile.jpg",
           "autoEmbed": true,
           "autoAutoplay": true,
-          "description": "ProGamer channel — uploads playlist embedded below"
+          "description": "Gaming Bricks channel — official uploads and playlists"
         }
       ]
     },
@@ -41,13 +41,13 @@
           "title": "Speedrun Techniques (Article)",
           "url": "https://example.com/speedrun-techniques",
           "embed": false,
-          "site": "harisatif"
+          "site": "huzaifa"
         },
         {
           "title": "Pro Gamer Playlists",
           "url": "https://www.youtube.com/playlist?list=PLexample",
           "embed": false,
-          "site": "harisatif"
+          "site": "huzaifa"
         }
       ]
     },
@@ -59,7 +59,7 @@
           "title": "MNode Intro (Docs)",
           "url": "https://example.com/mnode-intro",
           "embed": false,
-          "site": "harisatif"
+          "site": "huzaifa"
         }
       ]
     },
@@ -71,7 +71,7 @@
           "title": "Game AI Notes",
           "url": "https://example.com/game-ai-notes",
           "embed": false,
-          "site": "harisatif"
+          "site": "huzaifa"
         }
       ]
     },

@@ -1,40 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Multi-site Static Host</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Huzaifa – Personal Hub</title>
   <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#f4f4f4; color:#333 }
+    header{ background:#fff; padding:20px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center }
+    .profile-area{ display:flex; align-items:center; gap:15px }
+    .profile-pic{ width:70px; height:70px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center }
+    .profile-pic img{ width:100%; height:100%; object-fit:cover; display:block }
+    nav { display:flex; gap:20px }
+    .dropdown { position:relative }
+    .dropdown-btn{ background:transparent; border:none; font-weight:700; cursor:pointer }
+    .dropdown-content{ display:none; position:absolute; background:#fff; min-width:160px; box-shadow:0 4px 8px rgba(0,0,0,0.1); border-radius:6px; z-index:10 }
+    .dropdown:hover .dropdown-content{ display:block }
+    .dropdown-content a{ display:block; padding:8px 12px; color:#333; text-decoration:none }
+    .container{ display:grid; grid-template-columns:240px 1fr; height:calc(100vh - 100px) }
+    .sidebar{ background:#fff; padding:20px; border-right:1px solid #eee; overflow-y:auto }
+    .display-area{ padding:20px; overflow-y:auto }
+    .placeholder-box{ width:100%; height:300px; background:#ddd; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:24px; color:#555 }
+  </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="inner">
-      <h1>My Static Sites</h1>
-      <nav id="site-nav"></nav>
-    </div>
-  </header>
 
-  <main class="inner">
-    <section class="panel">
-      <h2>Available sites</h2>
-      <ul id="sites-list"></ul>
-      <p>Sites are stored under the <code>/sites/&lt;site-name&gt;/</code> folder. The GitHub Actions workflow publishes one site folder to GitHub Pages — see <code>.github/workflows/deploy.yml</code>.</p>
-    </section>
-
-    <section class="panel">
-      <h2>Categories (dynamic)</h2>
-      <div id="categories"></div>
-    </section>
-  </main>
-
-  <!-- YouTube modal -->
-  <div id="yt-modal" class="modal hidden" aria-hidden="true">
-    <div class="modal-content">
-      <button id="modal-close" class="btn-close">✕</button>
-      <div class="video-wrap"><iframe id="yt-iframe" src="" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
+<header>
+  <div class="profile-area">
+  <div class="profile-pic"><img src="/assets/img/profile.jpg" alt="Huzaifa profile"/></div>
+    <div>
+      <h1>Huzaifa</h1>
+      <p>Kid Creator • LEGO Fan • Video Maker</p>
     </div>
   </div>
 
-  <script src="assets/js/site.js"></script>
+  <nav>
+    <div class="dropdown">
+      <button class="dropdown-btn">Channel</button>
+      <div class="dropdown-content">
+        <a href="#" onclick="loadContent('latestVideos')">Latest Videos</a>
+        <a href="#" onclick="loadContent('latestShorts')">Latest Shorts</a>
+        <a href="#" onclick="loadContent('playlists')">Playlists</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropdown-btn">Collections</button>
+      <div class="dropdown-content">
+        <a href="#" onclick="loadContent('merch')">Merch</a>
+        <a href="#" onclick="loadContent('mocs')">MOCs</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropdown-btn">Personal</button>
+      <div class="dropdown-content">
+        <a href="#" onclick="loadContent('bio')">About Me</a>
+        <a href="#" onclick="loadContent('studies')">My Studies</a>
+        <a href="#" onclick="loadContent('research')">Research</a>
+        <a href="#" onclick="loadContent('collab')">Collaboration Space</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <div class="sidebar-section"><h2>About Me</h2><p>A kid who loves LEGO bricks, stop‑motion, and creating cool builds.</p></div>
+    <div class="sidebar-section"><h2>My Links</h2><ul><li><a href="https://www.youtube.com/@GamingBricks-67" target="_blank">YouTube Channel</a></li><li>Instagram</li><li>Discord (collabs)</li></ul></div>
+    <div class="sidebar-section"><h2>School &amp; Studies</h2><p>Upcoming projects, homework logs, science notes, and more.</p></div>
+    <div class="sidebar-section"><h2>Research</h2><p>Robotics, LEGO engineering, story writing, and model building ideas.</p></div>
+  </aside>
+
+  <main class="display-area">
+    <div id="contentBox" class="placeholder-box">Select a category to view</div>
+  </main>
+</div>
+
+<script src="/assets/js/site.js"></script>
+<script>
+  function loadContent(type) {
+    const box = document.getElementById('contentBox');
+    const templates = {
+      latestVideos: '📺 Latest Videos will appear here.',
+      latestShorts: '🎬 Latest Shorts will appear here.',
+      playlists: '🎵 Playlists section placeholder.',
+      merch: '🛍 Merch items will appear here.',
+      mocs: '🧱 Custom MOCs will appear here.',
+      bio: '👦 Personal Bio: A creative kid exploring LEGO builds and fun content.',
+      studies: '📘 Studies: schoolwork, learning progress, subjects, goals.',
+      research: '🔬 Research: science experiments, LEGO engineering tests.',
+      collab: '🤝 Collaboration Hub: friends, builders, and project partners.'
+    };
+    box.textContent = templates[type] || 'Content not found.';
+  }
+</script>
+
 </body>
 </html>

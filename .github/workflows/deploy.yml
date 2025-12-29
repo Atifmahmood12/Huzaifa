@@ -1,3 +1,44 @@
+name: Deploy multi-site to gh-pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare output folder
+        run: |
+          set -e
+          rm -rf out
+          mkdir -p out
+          # copy shared assets and data
+          cp -R assets out/
+          cp categories.json out/
+          # copy Huzaifa site to /Huzaifa
+          mkdir -p out/Huzaifa
+          cp -R sites/huzaifa/* out/Huzaifa/
+          # create Haris site at /Haris using the renamed page
+          mkdir -p out/Haris
+          if [ -f huzaifaatif.html ]; then
+            cp huzaifaatif.html out/Haris/index.html
+          else
+            echo "<html><body><h1>Haris site</h1><p>Content not present.</p></body></html>" > out/Haris/index.html
+          fi
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: gh-pages
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
 name: Deploy selected site to GitHub Pages
 
 on:
