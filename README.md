@@ -54,4 +54,16 @@ Next steps I can take for you
 - Add a GitHub Actions step to automatically publish `sites/huzaifa` to GitHub Pages.
 - Implement a small server-side proxy to keep the YouTube API key secret.
 
+Editing & deploying each site (quick)
+- Edit site files inside `sites/<site>/` (e.g. `sites/huzaifa/` or `sites/haris/`).
+- Put site-specific assets under `sites/<site>/assets/`; keep shared files in `assets/`.
+- Configure `sites/<site>/config.json` (set `siteName`, `title`, `channelUrl`, `avatar`). `siteName` becomes the published folder name (e.g. `Haris`, `Huzaifa`).
+- Build locally:
+	- `npm run build` or `bash scripts/build_sites.sh` (creates `out/`)
+	- Preview: `python3 -m http.server 8000` from repo root and open `http://localhost:8000/<SiteName>/`.
+- Publish flow:
+	- Commit your changes on `main` (or open a feature branch + PR): `git add -A && git commit -m "msg" && git push origin main`.
+	- The GitHub Actions workflow will run `scripts/build_sites.sh` and publish `out/` to the `gh-pages` branch.
+- URLs after publish: `https://<owner>.github.io/<repo>/Haris/` and `https://<owner>.github.io/<repo>/Huzaifa/` (configured via `siteName`).
+
 If you'd like me to do any of the above now, tell me which and I'll proceed.
