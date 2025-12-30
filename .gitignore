@@ -46,6 +46,8 @@ server.pid
 # Build / distribution
 dist/
 build/
+out/
+.out-gh/
 
 # Misc
 .DS_Store
