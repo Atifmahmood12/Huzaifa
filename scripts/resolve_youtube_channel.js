@@ -102,7 +102,7 @@ async function main(){
     if(!Array.isArray(data.categories)) data.categories = [];
     if(data.categories.length === 0) data.categories.push({ id: 'channels', title: 'Channels', items: [] });
     if(!Array.isArray(data.categories[0].items)) data.categories[0].items = [];
-    const newItem = { title: 'ProGamer channel', url: channelUrl, embed: false, type: 'channel', site: 'harisatif' };
+  const newItem = { title: 'ProGamer channel', url: channelUrl, embed: false, type: 'channel', site: 'haris' };
     if(uploadsPlaylist){ newItem.playlist = uploadsPlaylist; newItem.embedUrl = 'https://www.youtube.com/embed?listType=playlist&list=' + uploadsPlaylist; }
     data.categories[0].items.push(newItem);
     updated = true;

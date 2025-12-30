@@ -6,33 +6,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare output folder
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install (no-op if not using npm)
+        run: |
+          if [ -f package.json ]; then npm ci || true; fi
+
+      - name: Build sites (create out/)
         run: |
           set -e
-          rm -rf out
-          mkdir -p out
-          # copy shared assets and data
-          cp -R assets out/
-          cp categories.json out/
-          # copy Huzaifa site to /Huzaifa and also to root (so repo URL shows Huzaifa page)
-          mkdir -p out/Huzaifa
-          cp -R sites/huzaifa/* out/Huzaifa/
-          if [ -f sites/huzaifa/index.html ]; then
-            cp sites/huzaifa/index.html out/index.html
-          fi
-          # create Haris site at /Haris using the renamed page
-          mkdir -p out/Haris
-          if [ -f huzaifaatif.html ]; then
-            cp huzaifaatif.html out/Haris/index.html
-          else
-            echo "<html><body><h1>Haris site</h1><p>Content not present.</p></body></html>" > out/Haris/index.html
-          fi
+          bash scripts/build_sites.sh
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
@@ -42,78 +34,7 @@ jobs:
           publish_branch: gh-pages
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-name: Deploy multi-site to gh-pages
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Prepare output folder
-        run: |
-          set -e
-          rm -rf out
-          mkdir -p out
-          # copy shared assets and data
-          cp -R assets out/
-          cp categories.json out/
-          # copy Huzaifa site to /Huzaifa and also to root (so repo URL shows Huzaifa page)
-          mkdir -p out/Huzaifa
-          cp -R sites/huzaifa/* out/Huzaifa/
-          # copy Huzaifa index to root so https://<owner>.github.io/<repo>/ shows the Huzaifa site
-          if [ -f sites/huzaifa/index.html ]; then
-            cp sites/huzaifa/index.html out/index.html
-          fi
-          # create Haris site at /Haris using the renamed page
-          mkdir -p out/Haris
-          if [ -f huzaifaatif.html ]; then
-            cp huzaifaatif.html out/Haris/index.html
-          else
-            echo "<html><body><h1>Haris site</h1><p>Content not present.</p></body></html>" > out/Haris/index.html
-          fi
-
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
-          publish_branch: gh-pages
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-name: Deploy selected site to GitHub Pages
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      site_path:
-        description: 'Path to the site folder to publish (e.g. sites/harisatif)'
-        required: false
-        default: 'sites/harisatif'
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Use workflow_dispatch input when provided, otherwise default to sites/harisatif
-          publish_dir: ${{ github.event.inputs.site_path || 'sites/harisatif' }}
 
 # Notes:
-# - By default this workflow publishes 'sites/harisatif'.
-# - To publish a different site folder, run the workflow manually (Actions > Deploy selected site) and set the site_path input.
-# - The action will push to the 'gh-pages' branch. In your repo settings -> Pages set the source to the gh-pages branch.
+# - This workflow builds the out/ directory using scripts/build_sites.sh and publishes it to gh-pages.
+# - It no longer references or assumes the 'harisatif' folder; it uses whatever folders exist under sites/.
